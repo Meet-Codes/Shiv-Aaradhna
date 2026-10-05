@@ -36,7 +36,9 @@ RUN apk add --no-cache \
     freetype \
     libzip \
     icu-libs \
-    postgresql-client
+    libpq \
+    postgresql-client \
+    postgresql-dev
 
 # Install required PHP extensions
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
@@ -54,6 +56,14 @@ RUN install-php-extensions \
     pdo_mysql \
     pdo_sqlite \
     zip
+
+# Build-time verification: Docker build will FAIL if PDO, pdo_pgsql, or pgsql is missing
+RUN php -r "extension_loaded('PDO') || (fwrite(STDERR, 'FATAL: PDO extension is not loaded\n') && exit(1));" \
+    && php -r "extension_loaded('pdo_pgsql') || (fwrite(STDERR, 'FATAL: pdo_pgsql driver is missing\n') && exit(1));" \
+    && php -r "extension_loaded('pgsql') || (fwrite(STDERR, 'FATAL: pgsql driver is missing\n') && exit(1));" \
+    && php -r "in_array('pgsql', PDO::getAvailableDrivers()) || (fwrite(STDERR, 'FATAL: pgsql is not in PDO getAvailableDrivers\n') && exit(1));" \
+    && echo "=== POSTGRESQL EXTENSIONS VERIFIED AT BUILD TIME ===" \
+    && php -m | grep -E 'PDO|pdo_pgsql|pgsql'
 
 # Create required directories for Nginx and Supervisor
 RUN mkdir -p /run/nginx /var/log/supervisor /etc/nginx/http.d /etc/nginx/conf.d

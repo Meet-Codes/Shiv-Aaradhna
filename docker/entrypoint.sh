@@ -47,11 +47,12 @@ if [ "${RUN_MIGRATIONS}" = "true" ]; then
 fi
 
 # Optimization caches for production
-echo "=== DATABASE CONFIG CHECK ==="
+echo "=== DATABASE CONFIG & PDO CHECK ==="
 echo "DB_CONNECTION=${DB_CONNECTION:-NOT_SET}"
+php -r "echo 'Available PDO Drivers: ' . implode(', ', PDO::getAvailableDrivers()) . PHP_EOL;"
 php artisan config:show database.default
 php artisan config:show database.connections.pgsql.driver
-echo "============================="
+echo "==================================="
 if [ "${APP_ENV}" = "production" ]; then
     echo "Optimizing Laravel configuration and routes..."
     php artisan config:cache || true
