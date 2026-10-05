@@ -34,6 +34,11 @@ if [ "${RUN_MIGRATIONS}" = "true" ]; then
 fi
 
 # Optimization caches for production
+echo "=== DATABASE CONFIG CHECK ==="
+echo "DB_CONNECTION=${DB_CONNECTION:-NOT_SET}"
+php artisan config:show database.default
+php artisan config:show database.connections.pgsql.driver
+echo "============================="
 if [ "${APP_ENV}" = "production" ]; then
     echo "Optimizing Laravel configuration and routes..."
     php artisan config:cache || true
