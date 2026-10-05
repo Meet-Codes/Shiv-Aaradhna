@@ -57,12 +57,13 @@ RUN install-php-extensions \
     pdo_sqlite \
     zip
 
-# Build-time verification: Docker build will FAIL if PDO, pdo_pgsql, or pgsql is missing
+# Build-time verification: Docker build MUST FAIL if PDO, pdo_pgsql, or pgsql is missing from CLI or PHP-FPM
 RUN php -r "extension_loaded('PDO') || (fwrite(STDERR, 'FATAL: PDO extension is not loaded\n') && exit(1));" \
     && php -r "extension_loaded('pdo_pgsql') || (fwrite(STDERR, 'FATAL: pdo_pgsql driver is missing\n') && exit(1));" \
     && php -r "extension_loaded('pgsql') || (fwrite(STDERR, 'FATAL: pgsql driver is missing\n') && exit(1));" \
     && php -r "in_array('pgsql', PDO::getAvailableDrivers()) || (fwrite(STDERR, 'FATAL: pgsql is not in PDO getAvailableDrivers\n') && exit(1));" \
-    && echo "=== POSTGRESQL EXTENSIONS VERIFIED AT BUILD TIME ===" \
+    && (php-fpm -i | grep -qi "pdo_pgsql" || (fwrite(STDERR, "FATAL: PHP-FPM does not have pdo_pgsql loaded\n") && exit(1))) \
+    && echo "=== POSTGRESQL EXTENSIONS VERIFIED AT BUILD TIME (CLI & PHP-FPM) ===" \
     && php -m | grep -E 'PDO|pdo_pgsql|pgsql'
 
 # Create required directories for Nginx and Supervisor
