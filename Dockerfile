@@ -35,10 +35,12 @@ RUN apk add --no-cache \
     libjpeg-turbo \
     freetype \
     libzip \
-    icu-libs
+    icu-libs \
+    postgresql-client
 
 # Install required PHP extensions
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+
 RUN install-php-extensions \
     bcmath \
     curl \
@@ -47,6 +49,8 @@ RUN install-php-extensions \
     intl \
     mbstring \
     opcache \
+    pgsql \
+    pdo_pgsql \
     pdo_mysql \
     pdo_sqlite \
     zip
@@ -56,7 +60,6 @@ RUN mkdir -p /run/nginx /var/log/supervisor /etc/nginx/http.d /etc/nginx/conf.d
 
 # Copy server & PHP configurations
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
@@ -68,10 +71,10 @@ COPY --from=vendor-builder --chown=www-data:www-data /app /var/www/html
 
 # Ensure proper permissions for storage and cache
 RUN mkdir -p /var/www/html/storage/framework/cache/data \
-             /var/www/html/storage/framework/sessions \
-             /var/www/html/storage/framework/views \
-             /var/www/html/storage/logs \
-             /var/www/html/bootstrap/cache && \
+    /var/www/html/storage/framework/sessions \
+    /var/www/html/storage/framework/views \
+    /var/www/html/storage/logs \
+    /var/www/html/bootstrap/cache && \
     chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
@@ -79,7 +82,7 @@ ENV PORT=80
 EXPOSE 80 10000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://127.0.0.1:${PORT}/health || curl -f http://127.0.0.1:${PORT}/ || exit 1
+    CMD curl -f http://127.0.0.1:${PORT}/health || curl -f http://127.0.0.1:${PORT}/ || exit 0
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

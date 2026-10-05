@@ -27,10 +27,23 @@ chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 # Create storage link if not exists
 php artisan storage:link --force || true
 
+# Clear old caches before running migrations
+php artisan config:clear || true
+
 # Run database migrations if requested
 if [ "${RUN_MIGRATIONS}" = "true" ]; then
     echo "Running database migrations..."
-    php artisan migrate --force || true
+    MAX_RETRIES=5
+    RETRY_COUNT=0
+    until php artisan migrate --force; do
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
+            echo "Database migrations failed after $MAX_RETRIES attempts."
+            exit 1
+        fi
+        echo "Database migration attempt $RETRY_COUNT failed (database may be waking up). Retrying in 3 seconds..."
+        sleep 3
+    done
 fi
 
 # Optimization caches for production
