@@ -10,7 +10,8 @@ phpunit.xml
 .phpunit.result.cache
 *.md
 docker-compose*.yml
-database/database.sqlite
+database/*.sqlite
+database/*.sqlite3
 .vercelignore
 vercel.json
 fix_bg.py

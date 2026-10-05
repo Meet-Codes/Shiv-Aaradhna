@@ -51,20 +51,21 @@ RUN install-php-extensions \
     intl \
     mbstring \
     opcache \
-    pgsql \
-    pdo_pgsql \
     pdo_mysql \
     pdo_sqlite \
-    zip
+    zip \
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/include/postgresql/ \
+    && docker-php-ext-install pdo_pgsql pgsql
 
-# Build-time verification: Docker build MUST FAIL if PDO, pdo_pgsql, or pgsql is missing from CLI or PHP-FPM
-RUN php -r "extension_loaded('PDO') || (fwrite(STDERR, 'FATAL: PDO extension is not loaded\n') && exit(1));" \
-    && php -r "extension_loaded('pdo_pgsql') || (fwrite(STDERR, 'FATAL: pdo_pgsql driver is missing\n') && exit(1));" \
-    && php -r "extension_loaded('pgsql') || (fwrite(STDERR, 'FATAL: pgsql driver is missing\n') && exit(1));" \
-    && php -r "in_array('pgsql', PDO::getAvailableDrivers()) || (fwrite(STDERR, 'FATAL: pgsql is not in PDO getAvailableDrivers\n') && exit(1));" \
-    && (php-fpm -i | grep -qi "pdo_pgsql" || (fwrite(STDERR, "FATAL: PHP-FPM does not have pdo_pgsql loaded\n") && exit(1))) \
-    && echo "=== POSTGRESQL EXTENSIONS VERIFIED AT BUILD TIME (CLI & PHP-FPM) ===" \
-    && php -m | grep -E 'PDO|pdo_pgsql|pgsql'
+# Build-time verification: Docker build MUST FAIL if PostgreSQL support is missing
+RUN php -r 'if (!extension_loaded("PDO")) { fwrite(STDERR, "FATAL: PDO extension is not loaded\n"); exit(1); }' \
+    && php -r 'if (!extension_loaded("pdo_pgsql")) { fwrite(STDERR, "FATAL: pdo_pgsql driver is missing\n"); exit(1); }' \
+    && php -r 'if (!extension_loaded("pgsql")) { fwrite(STDERR, "FATAL: pgsql driver is missing\n"); exit(1); }' \
+    && php -r 'if (!in_array("pgsql", PDO::getAvailableDrivers(), true)) { fwrite(STDERR, "FATAL: pgsql is not in PDO::getAvailableDrivers()\n"); exit(1); }' \
+    && php-fpm -i | grep -qi "pdo_pgsql" \
+    && echo "=== POSTGRESQL EXTENSIONS VERIFIED ===" \
+    && php -m | grep -E '^(PDO|pdo_pgsql|pgsql)$' \
+    && php -r 'echo "PDO drivers: " . implode(", ", PDO::getAvailableDrivers()) . PHP_EOL;'
 
 # Create required directories for Nginx and Supervisor
 RUN mkdir -p /run/nginx /var/log/supervisor /etc/nginx/http.d /etc/nginx/conf.d

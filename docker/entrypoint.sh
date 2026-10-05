@@ -28,15 +28,15 @@ echo "=== PHP DATABASE DRIVER CHECK ==="
 PHP_VER=$(php -r 'echo PHP_VERSION;')
 echo "PHP: ${PHP_VER}"
 
-if php -r "exit(extension_loaded('pdo_pgsql') && in_array('pgsql', PDO::getAvailableDrivers()) ? 0 : 1);"; then
+if php -r 'exit(extension_loaded("pdo_pgsql") && in_array("pgsql", PDO::getAvailableDrivers(), true) ? 0 : 1);'; then
     echo "pdo_pgsql loaded: YES"
 else
     echo "FATAL: pdo_pgsql driver is NOT loaded in PHP runtime!"
-    echo "Available PDO drivers: $(php -r 'echo implode(\", \", PDO::getAvailableDrivers());')"
+    echo "Available PDO drivers: $(php -r 'echo implode(", ", PDO::getAvailableDrivers());')"
     echo "Aborting container startup. Web server will not start."
     exit 1
 fi
-echo "PDO drivers: $(php -r 'echo implode(\", \", PDO::getAvailableDrivers());')"
+echo "PDO drivers: $(php -r 'echo implode(", ", PDO::getAvailableDrivers());')"
 echo "================================="
 
 # Step 4: Verify Laravel DB configuration without printing secrets
