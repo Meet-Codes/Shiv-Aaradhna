@@ -23,7 +23,24 @@ php artisan storage:link --force || true
 # Clear any stale bootstrap configuration caches
 php artisan config:clear || true
 
-# Step 3: Mandatory Runtime Verification of PHP PostgreSQL Driver
+# Step 3: Normalize Neon PostgreSQL pooled host to direct host for migrations
+# Neon's -pooler endpoint uses PgBouncer in transaction mode, which breaks transactional DDL with SQLSTATE[25P02].
+if echo "${DB_HOST:-}" | grep -q -- "-pooler\."; then
+    DIRECT_HOST=$(echo "${DB_HOST}" | sed 's/-pooler\./\./')
+    echo "Notice: Neon pooled host detected (${DB_HOST})."
+    echo "Using direct host for migrations to prevent PgBouncer transaction aborts: ${DIRECT_HOST}"
+    export DB_HOST="${DIRECT_HOST}"
+fi
+
+if echo "${DB_URL:-}" | grep -q -- "-pooler\."; then
+    export DB_URL=$(echo "${DB_URL}" | sed 's/-pooler\./\./')
+fi
+
+if echo "${DATABASE_URL:-}" | grep -q -- "-pooler\."; then
+    export DATABASE_URL=$(echo "${DATABASE_URL}" | sed 's/-pooler\./\./')
+fi
+
+# Step 4: Mandatory Runtime Verification of PHP PostgreSQL Driver
 echo "=== PHP DATABASE DRIVER CHECK ==="
 PHP_VER=$(php -r 'echo PHP_VERSION;')
 echo "PHP: ${PHP_VER}"
@@ -39,41 +56,30 @@ fi
 echo "PDO drivers: $(php -r 'echo implode(", ", PDO::getAvailableDrivers());')"
 echo "================================="
 
-# Step 4: Verify Laravel DB configuration without printing secrets
+# Step 5: Verify Laravel DB configuration without printing secrets
 echo "=== DATABASE CONFIG ==="
 echo "DB_CONNECTION=${DB_CONNECTION:-NOT_SET}"
 php artisan config:show database.default
 php artisan config:show database.connections.pgsql.driver
 echo "======================="
 
-# Step 5 & 6: Run database migrations if requested; stop immediately on failure
+# Step 6: Safe read-only database pre-flight inspection
+if [ -f "/var/www/html/docker/inspect-db.php" ]; then
+    php /var/www/html/docker/inspect-db.php || true
+fi
+
+# Step 7: Run database migrations if requested; stop immediately on failure
 if [ "${RUN_MIGRATIONS}" = "true" ]; then
     echo "Running database migrations..."
-    # Neon compute wake-up retry loop (up to 5 attempts, 3s delay)
-    MAX_RETRIES=5
-    RETRY_COUNT=0
-    MIGRATE_SUCCESS=false
-
-    until [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; do
-        if php artisan migrate --force; then
-            MIGRATE_SUCCESS=true
-            break
-        fi
-        RETRY_COUNT=$((RETRY_COUNT + 1))
-        if [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; then
-            echo "Database migration attempt $RETRY_COUNT failed (database may be waking up). Retrying in 3 seconds..."
-            sleep 3
-        fi
-    done
-
-    if [ "$MIGRATE_SUCCESS" != "true" ]; then
-        echo "FATAL: Database migrations failed after $MAX_RETRIES attempts. Aborting container startup."
+    if ! php artisan migrate --force; then
+        echo "ERROR: Database migration failed."
+        echo "Container startup aborted."
         exit 1
     fi
     echo "Database migrations completed successfully."
 fi
 
-# Step 7, 8, 9: Cache Laravel configuration, routes, and views (explicitly without ignoring errors)
+# Step 8: Cache Laravel configuration, routes, and views (explicitly without ignoring errors)
 if [ "${APP_ENV}" = "production" ]; then
     echo "Optimizing Laravel configuration and routes..."
     php artisan config:cache
@@ -81,5 +87,5 @@ if [ "${APP_ENV}" = "production" ]; then
     php artisan view:cache
 fi
 
-# Step 10 & 11: Supervisor starts PHP-FPM + Nginx
+# Step 9: Supervisor starts PHP-FPM + Nginx
 exec "$@"
