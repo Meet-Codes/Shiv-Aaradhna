@@ -14,7 +14,7 @@
   - Mandatory PHP Extensions: `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `gd`, `json`, `mbstring`, `openssl`, `pcre`, `pdo_mysql`, `tokenizer`, `xml`, `zip`
 - **Database:** MySQL 8.0+ / MariaDB 10.4+ with `utf8mb4` character set and `utf8mb4_unicode_ci` collation
 - **Process Supervisor:** `supervisor` (Linux) or Windows Service Wrapper (NSSM)
-- **Node.js:** Node.js 20+ LTS & npm (for asset compilation)
+- **Node.js:** Not required in production (Pure PHP standalone assets pipeline)
 - **Composer:** Composer 2.x
 
 ---

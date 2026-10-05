@@ -19,7 +19,9 @@
         <link rel="icon" href="/favicon.ico">
     @endif
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Production Standalone CSS & JavaScript -->
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) ?: '1.0' }}">
+    <script defer src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) ?: '1.0' }}"></script>
     @stack('styles')
 </head>
 <body class="bg-[#FCFCFA] text-stone-800 antialiased selection:bg-[#9C451B] selection:text-white" x-data="rfqManager()">

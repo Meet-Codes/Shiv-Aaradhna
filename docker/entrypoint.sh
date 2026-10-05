@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+# Configure port dynamically from environment ($PORT for Render/Heroku/Cloud Run, default 80)
+PORT="${PORT:-80}"
+echo "Configuring web server to listen on port ${PORT}..."
+sed -i "s/listen [0-9]\+;/listen ${PORT};/g" /etc/nginx/http.d/default.conf /etc/nginx/conf.d/default.conf 2>/dev/null || true
+sed -i "s/listen \[::\]:[0-9]\+;/listen [::]:${PORT};/g" /etc/nginx/http.d/default.conf /etc/nginx/conf.d/default.conf 2>/dev/null || true
+
 # Ensure Laravel storage directories exist
 mkdir -p /var/www/html/storage/framework/cache/data \
          /var/www/html/storage/framework/sessions \

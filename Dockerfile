@@ -1,121 +1,85 @@
-# # ==========================================
-# # Stage 1: Build Frontend Assets with Node & Vite
-# # ==========================================
-# FROM node:20-alpine AS frontend-builder
-# WORKDIR /app
+# ==========================================
+# Shiv Aaradhana Private Limited — Production Dockerfile
+# Standalone PHP 8.3-FPM + High-Performance Nginx + Supervisor
+# Zero Node.js / Zero Vite Dependency
+# ==========================================
 
-# COPY package*.json ./
-# RUN npm ci
+# Stage 1: Vendor Dependencies Builder
+FROM composer:2 AS vendor-builder
+WORKDIR /app
 
-# COPY resources ./resources
-# COPY public ./public
-# COPY vite.config.js ./
-# RUN npm run build
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader \
+    --no-scripts \
+    --ignore-platform-reqs
 
-# # ==========================================
-# # Stage 2: Install PHP Dependencies with Composer
-# # ==========================================
-# FROM composer:2 AS composer-builder
-# WORKDIR /app
+COPY . .
+RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
 
-# COPY composer.json composer.lock ./
-# RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --ignore-platform-reqs
-
-# COPY . .
-# RUN composer dump-autoload --optimize --no-dev
-
-# # ==========================================
-# # Stage 3: Production Runtime (PHP-FPM + Nginx)
-# # ==========================================
-# FROM php:8.2-fpm-alpine
-
-# WORKDIR /var/www/html
-
-# # Install system dependencies
-# RUN apk add --no-cache \
-#     nginx \
-#     supervisor \
-#     curl \
-#     bash \
-#     libpng \
-#     libjpeg-turbo \
-#     freetype \
-#     libzip \
-#     icu-libs
-
-# # Install PHP extensions using reliable installer
-# COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
-# RUN install-php-extensions \
-#     bcmath \
-#     curl \
-#     exif \
-#     gd \
-#     intl \
-#     mbstring \
-#     opcache \
-#     pdo_mysql \
-#     pdo_sqlite \
-#     zip
-
-# # Create required directories for Nginx and Supervisor
-# RUN mkdir -p /run/nginx /var/log/supervisor /etc/nginx/http.d /etc/nginx/conf.d
-
-# # Copy server & PHP configurations
-# COPY docker/nginx.conf /etc/nginx/http.d/default.conf
-# COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
-# COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
-# COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-# COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-
-# RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# # Copy application source and vendor from composer-builder
-# COPY --from=composer-builder --chown=www-data:www-data /app /var/www/html
-
-# # Copy compiled frontend assets from frontend-builder
-# COPY --from=frontend-builder --chown=www-data:www-data /app/public/build /var/www/html/public/build
-
-# # Ensure proper permissions for storage and cache
-# RUN mkdir -p /var/www/html/storage/framework/cache/data \
-#              /var/www/html/storage/framework/sessions \
-#              /var/www/html/storage/framework/views \
-#              /var/www/html/storage/logs \
-#              /var/www/html/bootstrap/cache && \
-#     chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
-#     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
-# EXPOSE 80
-
-# HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-#     CMD curl -f http://127.0.0.1/ || exit 1
-
-# ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-# CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-FROM php:8.3-cli
+# Stage 2: Production Runtime (PHP-FPM + Nginx + Supervisor)
+FROM php:8.3-fpm-alpine
 
 WORKDIR /var/www/html
 
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
+# Install production system dependencies
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
     curl \
-    nodejs \
-    npm \
-    libzip-dev \
-    && docker-php-ext-install zip \
-    && rm -rf /var/lib/apt/lists/*
+    bash \
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    libzip \
+    icu-libs
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Install required PHP extensions
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions \
+    bcmath \
+    curl \
+    exif \
+    gd \
+    intl \
+    mbstring \
+    opcache \
+    pdo_mysql \
+    pdo_sqlite \
+    zip
 
-COPY . .
+# Create required directories for Nginx and Supervisor
+RUN mkdir -p /run/nginx /var/log/supervisor /etc/nginx/http.d /etc/nginx/conf.d
 
-RUN composer install --no-dev --optimize-autoloader
+# Copy server & PHP configurations
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-RUN npm install
-RUN npm run build
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-RUN php artisan optimize
+# Copy application source and optimized vendor from vendor-builder
+COPY --from=vendor-builder --chown=www-data:www-data /app /var/www/html
 
-EXPOSE 10000
+# Ensure proper permissions for storage and cache
+RUN mkdir -p /var/www/html/storage/framework/cache/data \
+             /var/www/html/storage/framework/sessions \
+             /var/www/html/storage/framework/views \
+             /var/www/html/storage/logs \
+             /var/www/html/bootstrap/cache && \
+    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
+    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-CMD php artisan serve --host=0.0.0.0 --port=${PORT}
+ENV PORT=80
+EXPOSE 80 10000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://127.0.0.1:${PORT}/health || curl -f http://127.0.0.1:${PORT}/ || exit 1
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

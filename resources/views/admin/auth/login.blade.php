@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Login — Shiv Aaradhana Private Limited</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Production Standalone CSS & JavaScript -->
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) ?: '1.0' }}">
+    <script defer src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) ?: '1.0' }}"></script>
 </head>
 <body class="bg-[#091433] text-stone-100 min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
