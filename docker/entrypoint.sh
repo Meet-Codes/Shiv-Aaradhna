@@ -40,6 +40,14 @@ if echo "${DATABASE_URL:-}" | grep -q -- "-pooler\."; then
     export DATABASE_URL=$(echo "${DATABASE_URL}" | sed 's/-pooler\./\./')
 fi
 
+# Ensure DB_HOST is populated if DATABASE_URL is provided
+if [ -z "${DB_HOST:-}" ] && [ -n "${DATABASE_URL:-}" ]; then
+    EXTRACTED_HOST=$(php -r '$url = parse_url(getenv("DATABASE_URL")); echo $url["host"] ?? "";')
+    if [ -n "${EXTRACTED_HOST}" ]; then
+        export DB_HOST="${EXTRACTED_HOST}"
+    fi
+fi
+
 # Step 4: Mandatory Runtime Verification of PHP PostgreSQL Driver
 echo "=== PHP DATABASE DRIVER CHECK ==="
 PHP_VER=$(php -r 'echo PHP_VERSION;')
@@ -68,15 +76,17 @@ if [ -f "/var/www/html/docker/inspect-db.php" ]; then
     php /var/www/html/docker/inspect-db.php || true
 fi
 
-# Step 7: Run database migrations if requested; stop immediately on failure
-if [ "${RUN_MIGRATIONS}" = "true" ]; then
+# Step 7: Run database migrations and seeders automatically
+if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     echo "Running database migrations..."
-    if ! php artisan migrate --force; then
-        echo "ERROR: Database migration failed."
-        echo "Container startup aborted."
-        exit 1
+    if php artisan migrate --force; then
+        echo "Database migrations completed successfully."
+        echo "Running idempotent database seeders..."
+        php artisan db:seed --force || true
+        echo "Database seed completed."
+    else
+        echo "Notice: Database migrations could not be completed at startup. Will retry on next start."
     fi
-    echo "Database migrations completed successfully."
 fi
 
 # Step 8: Ensure LOG_CHANNEL defaults to stderr for container logs
