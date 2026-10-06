@@ -36,17 +36,26 @@ class BrandingService
      */
     public function getBranding(): array
     {
-        return Cache::rememberForever(self::CACHE_KEY_BRANDING, function () {
-            $section = CmsSection::getByKey('branding');
-            $payload = $section?->payload ?? [];
+        try {
+            return Cache::rememberForever(self::CACHE_KEY_BRANDING, function () {
+                $section = CmsSection::getByKey('branding');
+                $payload = $section?->payload ?? [];
 
+                return [
+                    'main_logo' => $payload['main_logo'] ?? null,
+                    'light_logo' => $payload['light_logo'] ?? null,
+                    'favicon' => $payload['favicon'] ?? null,
+                    'company_name' => $payload['company_name'] ?? 'Shiv Aaradhana Private Limited',
+                ];
+            });
+        } catch (\Throwable) {
             return [
-                'main_logo' => $payload['main_logo'] ?? null,
-                'light_logo' => $payload['light_logo'] ?? null,
-                'favicon' => $payload['favicon'] ?? null,
-                'company_name' => $payload['company_name'] ?? 'Shiv Aaradhana Private Limited',
+                'main_logo' => null,
+                'light_logo' => null,
+                'favicon' => null,
+                'company_name' => 'Shiv Aaradhana Private Limited',
             ];
-        });
+        }
     }
 
     /**
@@ -56,23 +65,34 @@ class BrandingService
      */
     public function getHeroImages(): array
     {
-        return Cache::rememberForever(self::CACHE_KEY_HERO, function () {
-            $section = CmsSection::getByKey('hero');
-            $payload = $section?->payload ?? [];
+        try {
+            return Cache::rememberForever(self::CACHE_KEY_HERO, function () {
+                $section = CmsSection::getByKey('hero');
+                $payload = $section?->payload ?? [];
 
+                $defaultDesktop = '/images/categories/agro-products.jpg';
+                $desktop = ! empty($payload['hero_image_desktop']) ? $payload['hero_image_desktop'] : $defaultDesktop;
+                $mobile = ! empty($payload['hero_image_mobile']) ? $payload['hero_image_mobile'] : $desktop;
+                $alt = ! empty($payload['hero_image_alt']) ? $payload['hero_image_alt'] : 'Shiv Aaradhana Agricultural Heritage and Export Commodities';
+
+                return [
+                    'desktop' => $desktop,
+                    'mobile' => $mobile,
+                    'alt' => $alt,
+                    'has_custom_desktop' => ! empty($payload['hero_image_desktop']),
+                    'has_custom_mobile' => ! empty($payload['hero_image_mobile']),
+                ];
+            });
+        } catch (\Throwable) {
             $defaultDesktop = '/images/categories/agro-products.jpg';
-            $desktop = ! empty($payload['hero_image_desktop']) ? $payload['hero_image_desktop'] : $defaultDesktop;
-            $mobile = ! empty($payload['hero_image_mobile']) ? $payload['hero_image_mobile'] : $desktop;
-            $alt = ! empty($payload['hero_image_alt']) ? $payload['hero_image_alt'] : 'Shiv Aaradhana Agricultural Heritage and Export Commodities';
-
             return [
-                'desktop' => $desktop,
-                'mobile' => $mobile,
-                'alt' => $alt,
-                'has_custom_desktop' => ! empty($payload['hero_image_desktop']),
-                'has_custom_mobile' => ! empty($payload['hero_image_mobile']),
+                'desktop' => $defaultDesktop,
+                'mobile' => $defaultDesktop,
+                'alt' => 'Shiv Aaradhana Agricultural Heritage and Export Commodities',
+                'has_custom_desktop' => false,
+                'has_custom_mobile' => false,
             ];
-        });
+        }
     }
 
     /**

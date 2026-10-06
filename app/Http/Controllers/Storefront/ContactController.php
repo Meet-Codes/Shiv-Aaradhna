@@ -10,7 +10,12 @@ class ContactController extends Controller
 {
     public function index(): View
     {
-        $contact = CmsSection::getByKey('contact_verified');
+        try {
+            $contact = CmsSection::getByKey('contact_verified');
+        } catch (\Throwable $e) {
+            report($e);
+            $contact = null;
+        }
 
         return view('storefront.contact', compact('contact'));
     }
