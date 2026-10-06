@@ -56,7 +56,9 @@ Route::get('/privacy-policy', [LegalController::class, 'privacy'])->name('legal.
 Route::get('/terms-of-trade', [LegalController::class, 'terms'])->name('legal.terms');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
-Route::get('/health', [HealthCheckController::class, 'check'])->name('health');
+Route::get('/health', [HealthCheckController::class, 'check'])
+    ->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class])
+    ->name('health');
 
 /*
 |--------------------------------------------------------------------------

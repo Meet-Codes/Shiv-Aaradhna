@@ -52,10 +52,10 @@ RUN install-php-extensions \
     mbstring \
     opcache \
     pdo_mysql \
+    pdo_pgsql \
+    pgsql \
     pdo_sqlite \
-    zip \
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/include/postgresql/ \
-    && docker-php-ext-install pdo_pgsql pgsql
+    zip
 
 # Build-time verification: Docker build MUST FAIL if PostgreSQL support is missing
 RUN php -r 'if (!extension_loaded("PDO")) { fwrite(STDERR, "FATAL: PDO extension is not loaded\n"); exit(1); }' \
