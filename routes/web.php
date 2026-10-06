@@ -57,7 +57,15 @@ Route::get('/terms-of-trade', [LegalController::class, 'terms'])->name('legal.te
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('/health', [HealthCheckController::class, 'check'])
-    ->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class])
+    ->withoutMiddleware([
+        'web',
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+        \Illuminate\Routing\Middleware\SubstituteBindings::class,
+    ])
     ->name('health');
 
 /*

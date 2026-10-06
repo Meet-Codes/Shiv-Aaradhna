@@ -79,13 +79,25 @@ if [ "${RUN_MIGRATIONS}" = "true" ]; then
     echo "Database migrations completed successfully."
 fi
 
-# Step 8: Cache Laravel configuration, routes, and views (explicitly without ignoring errors)
-if [ "${APP_ENV}" = "production" ]; then
-    echo "Optimizing Laravel configuration and routes..."
-    php artisan config:cache
-    php artisan route:cache
-    php artisan view:cache
+# Step 8: Ensure LOG_CHANNEL defaults to stderr for container logs
+export LOG_CHANNEL="${LOG_CHANNEL:-stderr}"
+
+# Step 9: Verify APP_KEY presence without exposing secrets
+if [ -n "${APP_KEY:-}" ]; then
+    echo "APP_KEY: Configured"
+else
+    echo "WARNING: APP_KEY environment variable is NOT SET! Application will throw 500 on web routes."
 fi
 
-# Step 9: Supervisor starts PHP-FPM + Nginx
+# Step 10: Cache Laravel configuration, routes, and views
+echo "Optimizing Laravel configuration, routes, and views..."
+php artisan config:cache || true
+php artisan route:cache || true
+php artisan view:cache || true
+
+# Step 11: Guarantee correct permissions for www-data on all generated files
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Step 12: Supervisor starts PHP-FPM + Nginx
 exec "$@"

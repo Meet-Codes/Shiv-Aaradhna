@@ -73,6 +73,7 @@ RUN mkdir -p /run/nginx /var/log/supervisor /etc/nginx/http.d /etc/nginx/conf.d
 # Copy server & PHP configurations
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY docker/fpm-pool.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
