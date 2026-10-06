@@ -82,11 +82,13 @@ fi
 # Step 8: Ensure LOG_CHANNEL defaults to stderr for container logs
 export LOG_CHANNEL="${LOG_CHANNEL:-stderr}"
 
-# Step 9: Verify APP_KEY presence without exposing secrets
-if [ -n "${APP_KEY:-}" ]; then
-    echo "APP_KEY: Configured"
+# Step 9: Guarantee APP_KEY presence
+if [ -z "${APP_KEY:-}" ]; then
+    echo "Notice: APP_KEY environment variable is missing. Generating runtime key..."
+    export APP_KEY=$(php artisan key:generate --show --no-interaction)
+    echo "APP_KEY: Generated runtime key."
 else
-    echo "WARNING: APP_KEY environment variable is NOT SET! Application will throw 500 on web routes."
+    echo "APP_KEY: Configured."
 fi
 
 # Step 10: Cache Laravel configuration, routes, and views

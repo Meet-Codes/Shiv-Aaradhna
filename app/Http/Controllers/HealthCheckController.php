@@ -54,6 +54,20 @@ class HealthCheckController extends Controller
             ];
         }
 
+        // Check safe environment key presence (boolean only, zero secret leakage)
+        $envPresence = [];
+        $checkKeys = [
+            'APP_KEY', 'DB_CONNECTION', 'DB_HOST', 'DB_PORT',
+            'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_URL',
+            'DATABASE_URL', 'POSTGRES_URL', 'PGHOST', 'PGDATABASE',
+            'PGUSER', 'PGPASSWORD', 'PGPORT', 'NEON_DATABASE_URL',
+        ];
+        foreach ($checkKeys as $k) {
+            $val = getenv($k) ?: env($k);
+            $envPresence[$k] = !empty($val);
+        }
+        $checks['env_presence'] = $envPresence;
+
         return response()->json([
             'status' => $status,
             'timestamp' => now()->toIso8601String(),

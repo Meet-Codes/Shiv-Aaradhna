@@ -86,12 +86,12 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL') ?: env('DATABASE_URL'),
-            'host' => env('DB_HOST'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE'),
-            'username' => env('DB_USERNAME'),
-            'password' => env('DB_PASSWORD'),
+            'url' => env('DB_URL') ?: env('DATABASE_URL') ?: env('POSTGRES_URL') ?: env('NEON_DATABASE_URL'),
+            'host' => env('DB_HOST') ?: env('PGHOST'),
+            'port' => env('DB_PORT') ?: env('PGPORT', '5432'),
+            'database' => env('DB_DATABASE') ?: env('PGDATABASE'),
+            'username' => env('DB_USERNAME') ?: env('PGUSER'),
+            'password' => env('DB_PASSWORD') ?: env('PGPASSWORD'),
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,
