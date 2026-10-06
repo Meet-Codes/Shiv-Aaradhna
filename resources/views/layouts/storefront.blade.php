@@ -356,7 +356,14 @@
                                 <span class="text-[11px] font-bold text-stone-600 whitespace-nowrap">+ Add Commodity:</span>
                                 <select @change="if($event.target.value) { addProduct($event.target.value, $event.target.options[$event.target.selectedIndex].text, '1 x 20ft FCL', ''); $event.target.value = ''; }" class="flex-1 w-full px-3 py-1.5 rounded-lg border border-stone-300 text-xs bg-white focus:ring-2 focus:ring-[#9C451B]">
                                     <option value="">-- Choose Commodity to Add to Quote --</option>
-                                    @foreach(\App\Models\Product::published()->orderBy('name')->get() as $p)
+                                    @php
+                                        try {
+                                            $rfqDropdownProducts = \App\Models\Product::published()->orderBy('name')->get();
+                                        } catch (\Throwable) {
+                                            $rfqDropdownProducts = collect();
+                                        }
+                                    @endphp
+                                    @foreach($rfqDropdownProducts as $p)
                                         <option value="{{ $p->id }}">{{ $p->name }} ({{ $p->origin }})</option>
                                     @endforeach
                                 </select>
