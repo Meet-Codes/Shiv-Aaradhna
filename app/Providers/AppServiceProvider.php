@@ -28,6 +28,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useTailwind();
 
+        // Enforce HTTPS across all URLs and assets in production or behind SSL reverse proxies
+        if ($this->app->environment('production') || request()->header('x-forwarded-proto') === 'https' || request()->server('HTTP_X_FORWARDED_PROTO') === 'https') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Share branding settings globally with all layouts and storefront views
         View::composer(['layouts.storefront', 'layouts.admin', 'storefront.*', 'admin.*'], function ($view) {
             $view->with('branding', app(BrandingService::class)->getBranding());

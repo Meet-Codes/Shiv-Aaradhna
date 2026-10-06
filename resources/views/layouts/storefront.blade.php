@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>@yield('title', 'Shiv Aaradhana Private Limited — Premium International B2B Import-Export')</title>
     <meta name="description" content="@yield('meta_description', 'Shiv Aaradhana Private Limited is a premier international B2B exporter of agro products, spices, and textiles rooted in Gujarat, India with 5th-generation heritage.')">
     <link rel="canonical" href="{{ url()->current() }}">

@@ -89,8 +89,10 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     fi
 fi
 
-# Step 8: Ensure LOG_CHANNEL defaults to stderr for container logs
+# Step 8: Ensure LOG_CHANNEL defaults to stderr and APP_URL defaults to HTTPS
 export LOG_CHANNEL="${LOG_CHANNEL:-stderr}"
+export APP_URL="${APP_URL:-https://shiv-aaradhna.onrender.com}"
+export ASSET_URL="${ASSET_URL:-https://shiv-aaradhna.onrender.com}"
 
 # Step 9: Guarantee APP_KEY presence
 if [ -z "${APP_KEY:-}" ]; then
