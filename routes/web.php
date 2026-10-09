@@ -12,6 +12,7 @@ use App\Http\Controllers\HealthCheckController;
 use App\Http\Controllers\Storefront\AboutController;
 use App\Http\Controllers\Storefront\CategoryController;
 use App\Http\Controllers\Storefront\ContactController;
+use App\Http\Controllers\Storefront\FeaturedController;
 use App\Http\Controllers\Storefront\HomeController;
 use App\Http\Controllers\Storefront\InquiryController;
 use App\Http\Controllers\Storefront\LegalController;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/featured', [FeaturedController::class, 'index'])->name('featured');
 Route::get('/about', [AboutController::class, 'index'])->name('about');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 

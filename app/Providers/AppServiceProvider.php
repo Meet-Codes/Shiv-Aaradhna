@@ -28,8 +28,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useTailwind();
 
-        // Enforce HTTPS across all URLs and assets in production or behind SSL reverse proxies
-        if ($this->app->environment('production') || request()->header('x-forwarded-proto') === 'https' || request()->server('HTTP_X_FORWARDED_PROTO') === 'https') {
+        // Enforce HTTPS across all URLs and assets in production or behind SSL reverse proxies (excluding localhost/127.0.0.1)
+        $isLocal = in_array(request()->getHost(), ['localhost', '127.0.0.1']);
+        if (!$isLocal && ($this->app->environment('production') || request()->header('x-forwarded-proto') === 'https' || request()->server('HTTP_X_FORWARDED_PROTO') === 'https')) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 

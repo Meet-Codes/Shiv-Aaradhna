@@ -37,6 +37,9 @@
                     <button @click="triggerQuote('', '')" class="px-7 py-3.5 rounded-lg bg-white/10 hover:bg-white/20 text-[#EBD6B4] border border-[#EBD6B4]/40 font-medium text-sm backdrop-blur-sm transition-all">
                         {{ $hero->payload['secondary_cta_text'] ?? 'Request a Quote' }}
                     </button>
+                    <a href="{{ route('featured') }}" class="px-7 py-3.5 rounded-lg bg-[#394F3D]/80 hover:bg-[#394F3D] text-[#EBD6B4] hover:text-white border border-[#EBD6B4]/30 hover:border-[#EBD6B4] font-medium text-sm backdrop-blur-sm shadow-lg transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center">
+                        Featured
+                    </a>
                 </div>
 
                 <!-- Stats Grid -->
@@ -194,7 +197,7 @@
 </section>
 
 <!-- Featured Products Grid -->
-<section class="py-20 bg-white">
+<section class="py-20 bg-[#F7F3EC] border-y border-stone-200/60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
@@ -209,11 +212,14 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @foreach($featuredProducts as $product)
-            <div class="group bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+            <div class="group bg-white rounded-2xl border border-stone-200/90 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
                 <div>
                     <!-- Product Image -->
                     <div class="h-56 overflow-hidden relative bg-stone-50">
-                        <img src="{{ $product->primary_image ?? '/images/products/sesame-seeds.jpg' }}" alt="{{ $product->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <img src="{{ $product->primary_image ?? '/images/products/sesame-seeds.jpg' }}" 
+                             alt="{{ $product->name }}" 
+                             onerror="this.onerror=null;this.src='/images/categories/agro-products.jpg';" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         
                         <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
                             <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#394F3D] text-white">
@@ -388,11 +394,8 @@
         <p class="text-sm sm:text-base text-stone-200 max-w-2xl mx-auto leading-relaxed">
             Whether seeking full container loads of Gujarat cumin, sesame seeds, cotton bales, or custom dehydrated flakes, our export desk is ready to provide transparent specs and competitive pricing.
         </p>
-        <div class="pt-2 flex flex-wrap justify-center gap-4">
-            <button @click="triggerQuote('', '')" class="px-8 py-3.5 rounded-lg bg-[#EBD6B4] hover:bg-white text-[#091433] font-bold text-sm shadow-xl transition-all">
-                Request a Formal Quotation
-            </button>
-            <a href="{{ route('contact') }}" class="px-8 py-3.5 rounded-lg bg-transparent hover:bg-white/10 text-white border border-white/40 font-medium text-sm transition-all">
+        <div class="pt-2 flex justify-center">
+            <a href="{{ route('contact') }}" class="px-8 py-3.5 rounded-lg bg-transparent hover:bg-white/10 text-white border border-white/40 font-medium text-sm transition-all inline-flex items-center justify-center">
                 Direct Contact Details
             </a>
         </div>

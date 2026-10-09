@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @if(request()->isSecure() || (!in_array(request()->getHost(), ['localhost', '127.0.0.1']) && app()->environment('production')))
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    @endif
     <title>@yield('title', 'Shiv Aaradhana Private Limited — Premium International B2B Import-Export')</title>
     <meta name="description" content="@yield('meta_description', 'Shiv Aaradhana Private Limited is a premier international B2B exporter of agro products, spices, and textiles rooted in Gujarat, India with 5th-generation heritage.')">
     <link rel="canonical" href="{{ url()->current() }}">
@@ -28,26 +30,26 @@
 <body class="bg-[#FCFCFA] text-stone-800 antialiased selection:bg-[#9C451B] selection:text-white" x-data="rfqManager()">
 
     <!-- Top Utility Bar -->
-    <header class="bg-[#091433] text-stone-300 text-xs border-b border-stone-800/80">
+    <header class="bg-[#EBD6B4] text-[#091433] text-xs border-b border-[#091433]/15">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap justify-between items-center gap-3">
             <div class="flex items-center gap-6">
-                <span class="inline-flex items-center gap-1.5 text-[#EBD6B4] font-medium">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span class="inline-flex items-center gap-1.5 text-[#091433] font-medium">
+                    <svg class="w-3.5 h-3.5 text-[#091433]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     Rajkot, Gujarat, India
                 </span>
-                <span class="hidden md:inline text-stone-400">|</span>
-                <span class="hidden md:inline-flex items-center gap-1.5 text-stone-300">
-                    <svg class="w-3.5 h-3.5 text-[#EBD6B4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="hidden md:inline text-[#091433]/40">|</span>
+                <span class="hidden md:inline-flex items-center gap-1.5 text-[#091433]">
+                    <svg class="w-3.5 h-3.5 text-[#091433]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Export Desk: Mon – Sat 09:00 – 19:00 IST
                 </span>
             </div>
             <div class="flex items-center gap-5">
-                <a href="tel:+918487878721" class="inline-flex items-center gap-1.5 hover:text-[#EBD6B4] transition-colors font-medium">
-                    <svg class="w-3.5 h-3.5 text-[#EBD6B4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                <a href="tel:+918487878721" class="inline-flex items-center gap-1.5 text-[#091433] hover:text-[#9C451B] transition-colors font-medium">
+                    <svg class="w-3.5 h-3.5 text-[#091433]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                     +91 84878 78721
                 </a>
-                <span class="text-stone-600">/</span>
-                <a href="mailto:info.shivaaradhana@gmail.com" class="hover:text-[#EBD6B4] transition-colors truncate max-w-[200px] sm:max-w-none">
+                <span class="text-[#091433]/40">/</span>
+                <a href="mailto:info.shivaaradhana@gmail.com" class="text-[#091433] hover:text-[#9C451B] transition-colors truncate max-w-[200px] sm:max-w-none">
                     info.shivaaradhana@gmail.com
                 </a>
 
@@ -508,7 +510,7 @@
                     <ul class="space-y-2.5 text-xs">
                         <li><a href="{{ route('about') }}" class="hover:text-white transition-colors">Heritage & Philosophy</a></li>
                         <li><a href="{{ route('about') }}#process" class="hover:text-white transition-colors">4-Stage Sourcing Pipeline</a></li>
-                        <li><a href="{{ route('contact') }}" class="hover:text-white transition-colors">Rajkot Registered Office</a></li>
+                        <li><a href="{{ route('contact') }}" class="hover:text-white transition-colors">Regional Registered Office</a></li>
                         <li><a href="{{ route('legal.terms') }}" class="hover:text-white transition-colors">Terms of International Trade</a></li>
                         <li><a href="{{ route('legal.privacy') }}" class="hover:text-white transition-colors">Data Protection & Privacy Policy</a></li>
                     </ul>

@@ -67,6 +67,7 @@
                 <label for="sortSelect" class="text-xs text-stone-500 font-medium">Sort by:</label>
                 <select id="sortSelect" name="sort" onchange="this.form.submit()" class="text-xs px-3 py-1.5 rounded-lg border border-stone-300 bg-white text-stone-700 focus:outline-none focus:ring-1 focus:ring-[#9C451B]">
                     <option value="newest" {{ ($criteria['sort'] ?? '') === 'newest' ? 'selected' : '' }}>Newest Additions</option>
+                    <option value="oldest" {{ ($criteria['sort'] ?? '') === 'oldest' ? 'selected' : '' }}>Oldest Additions</option>
                     <option value="name_asc" {{ ($criteria['sort'] ?? '') === 'name_asc' ? 'selected' : '' }}>Name: A to Z</option>
                     <option value="name_desc" {{ ($criteria['sort'] ?? '') === 'name_desc' ? 'selected' : '' }}>Name: Z to A</option>
                 </select>

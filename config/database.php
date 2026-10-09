@@ -91,7 +91,9 @@ return [
             'port' => env('DB_PORT') ?: env('PGPORT', '5432'),
             'database' => env('DB_DATABASE') ?: env('PGDATABASE', 'forge'),
             'username' => env('DB_USERNAME') ?: env('PGUSER', 'forge'),
-            'password' => env('DB_PASSWORD') ?: env('PGPASSWORD', ''),
+            'password' => (env('DB_ENDPOINT') || str_contains((string) env('DB_HOST', ''), 'neon.tech')) && ! str_starts_with((string) env('DB_PASSWORD', ''), 'endpoint=')
+                ? 'endpoint=' . (env('DB_ENDPOINT') ?: explode('.', (string) env('DB_HOST', ''))[0]) . ';' . env('DB_PASSWORD', '')
+                : (env('DB_PASSWORD') ?: env('PGPASSWORD', '')),
             'charset' => 'utf8',
             'prefix' => '',
             'prefix_indexes' => true,

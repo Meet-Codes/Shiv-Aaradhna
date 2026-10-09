@@ -50,12 +50,12 @@ class DatabaseSearchService implements SearchServiceInterface
         }
 
         // Sorting
-        $sort = $criteria['sort'] ?? 'newest';
-        match ($sort) {
-            'name_asc' => $query->orderBy('name', 'asc'),
-            'name_desc' => $query->orderBy('name', 'desc'),
-            'oldest' => $query->oldest('published_at'),
-            default => $query->latest('published_at'),
+        $sort = ! empty($criteria['sort']) ? $criteria['sort'] : 'newest';
+        $query = match ($sort) {
+            'name_asc' => $query->orderBy('name', 'asc')->orderBy('id', 'asc'),
+            'name_desc' => $query->orderBy('name', 'desc')->orderBy('id', 'desc'),
+            'oldest' => $query->oldest('published_at')->oldest('id'),
+            default => $query->latest('published_at')->latest('id'),
         };
 
         return $query->paginate($perPage)->withQueryString();
